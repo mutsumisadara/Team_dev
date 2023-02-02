@@ -38,6 +38,14 @@ class TeamsController < ApplicationController
     end
   end
 
+  def edit
+    if current_user == @team.owner
+    team = Team.friendly.find(params[:id])
+    else
+      redirect_to teams_url(params[:team_id]), notice: "権限がありません"
+    end
+  end
+
   def destroy
     @team.destroy
     redirect_to teams_url, notice: I18n.t('views.messages.delete_team')

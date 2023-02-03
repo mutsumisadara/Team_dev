@@ -22,17 +22,15 @@ class AgendasController < ApplicationController
   end
 
   def destroy
+    # binding.pry
     @agenda = Agenda.find(params[:id])
-    if current_user.id == @agenda.user.id
+    if current_user.id == @agenda.user.id || current_user.id == @agenda.team.owner.id
       @members = @agenda.team.members
       @agenda.destroy
       redirect_to dashboard_url, notice: I18n.t('views.messages.delete_agenda')
-      AgendaDeletedMailer.agenda_deleted(@members).deliver
-    elsif current_user.id == @agenda.team.owner.id
-      @members = @agenda.team.members
-      @agenda.destroy
-      redirect_to dashboard_url, notice: I18n.t('views.messages.delete_agenda')
-      AgendaDeletedMailer.agenda_deleted(@members).deliver
+      @members.each do |member|
+        AgendaDeletedMailer.agenda_deleted(member.email).deliver
+      end
     else
       redirect_to dashboard_path, notice: '権限がありません'
     end
